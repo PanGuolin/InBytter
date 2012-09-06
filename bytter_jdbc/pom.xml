@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>bytter_api_base</artifactId>
+		<groupId>com.byttersoft.main</groupId>
+		<version>10.4.0-SNAPSHOT</version>
+		<relativePath>../bytter_api_base/</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+  <artifactId>bjdbc</artifactId>
+ 
+  <dependencies>
+  	<!-- dependencies of thirparty -->
+  	<dependency><groupId>third.byttersoft.main</groupId><artifactId>junit</artifactId><scope>test</scope></dependency>
+  	<dependency><groupId>third.byttersoft.main</groupId><artifactId>msbase</artifactId><scope>test</scope></dependency>
+	<dependency><groupId>third.byttersoft.main</groupId><artifactId>mssqlserver</artifactId><scope>test</scope></dependency>
+	<dependency><groupId>third.byttersoft.main</groupId><artifactId>msutil</artifactId><scope>test</scope></dependency>
+	<dependency><groupId>third.byttersoft.main</groupId><artifactId>ojdbc14</artifactId><scope>test</scope></dependency>
+	<dependency><groupId>third.byttersoft.main</groupId><artifactId>sqljdbc</artifactId><scope>test</scope></dependency>
+  </dependencies>
+</project>
