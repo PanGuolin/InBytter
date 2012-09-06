@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+   version="2.5"> 
+
+    <description>拜特补丁构建系统</description>
+    <display-name>拜特补丁构建系统</display-name>
+	<filter>
+    	<filter-name>loginFilter</filter-name>
+        <filter-class>com.byttersoft.patchbuild.filter.LoginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>loginFilter</filter-name>
+        <url-pattern>/manage/*</url-pattern>
+    </filter-mapping>
+    
+    <servlet>
+        <servlet-name>loginServlet</servlet-name>
+        <servlet-class>com.byttersoft.patchbuild.servlet.LoginServlet</servlet-class>
+        <init-param>
+            <param-name>deployers</param-name>
+            <param-value>autobuild;pangl</param-value>
+        </init-param>
+        <init-param>
+            <param-name>testers</param-name>
+            <param-value>autobuild;wudd</param-value>
+        </init-param>
+        <init-param>
+            <param-name>offline</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>getFileServlet</servlet-name>
+        <servlet-class>com.byttersoft.patchbuild.servlet.GetBuildFileServlet</servlet-class>
+        <init-param>
+            <param-name>fileNameEncoding</param-name>
+            <param-value>gb2312</param-value>
+        </init-param>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>buildManager</servlet-name>
+        <servlet-class>com.byttersoft.patchbuild.servlet.BuildManagerServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>buildPack</servlet-name>
+        <servlet-class>com.byttersoft.patchbuild.servlet.BuildPackServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+   		<servlet-name>JspTag</servlet-name>
+  	  	<servlet-class>com.JspTag</servlet-class>
+  	</servlet>
+    
+    
+    
+    <servlet-mapping>
+       	<servlet-name>loginServlet</servlet-name>
+       	<url-pattern>/login.do</url-pattern>
+   	</servlet-mapping>
+   	
+    <servlet-mapping>
+       	<servlet-name>buildManager</servlet-name>
+       	<url-pattern>/manage/buildManage.do</url-pattern>
+   	</servlet-mapping>
+   	
+    <servlet-mapping>
+       	<servlet-name>getFileServlet</servlet-name>
+       	<url-pattern>/manage/getFile.do</url-pattern>
+   	</servlet-mapping>
+   	 <servlet-mapping>
+       	<servlet-name>buildPack</servlet-name>
+       	<url-pattern>/manage/buildPack.do</url-pattern>
+   	</servlet-mapping>
+   	
+   	<servlet-mapping>
+    	<servlet-name>JspTag</servlet-name>
+    	<url-pattern>/JspTag</url-pattern>
+  	</servlet-mapping> 
+   	
+   	 <jsp-config>
+	    <taglib>
+	        <taglib-uri>http://java.sun.com/jsp/jstl/core</taglib-uri>
+	        <taglib-location>/WEB-INF/tld/c.tld</taglib-location>
+	    </taglib>
+    </jsp-config>
+</web-app>

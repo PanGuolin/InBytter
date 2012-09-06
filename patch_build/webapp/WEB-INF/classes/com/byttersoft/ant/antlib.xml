@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<antlib> 
+	<!-- Tasks -->
+	<taskdef classname="com.byttersoft.ant.BatchCopyTask" name="batchCopy"/>
+	<taskdef classname="com.byttersoft.ant.ReadPatchConfigTask" name="readPatchConfig"/>
+	<taskdef classname="com.byttersoft.ant.BatchDeleteTask" name="batchDelete"/>
+	<taskdef classname="com.byttersoft.ant.UpdateTestEvnTask" name="updateTestEvn"/>
+	<taskdef classname="com.byttersoft.ant.ListPatchConfigTask" name="listPatchConfig"/>
+	<taskdef classname="com.byttersoft.ant.FailDirEmptyTask" name="failOnEmpty"/>
+	<taskdef classname="com.byttersoft.ant.ListFilByMD" name="listFilByMD"/>
+	
+</antlib>

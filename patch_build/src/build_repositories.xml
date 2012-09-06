@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="GBK"?>
+<repositories xmlns="http://wwww.byttersoft.com"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.byttersoft.com build_repos.xsd">
+    
+    <!-- V10.3 SP1 补丁分支 -->
+    <repository>
+        <name>sp1</name>
+        <svn_url>https://192.168.0.2/svn/v101/v10.2二季度产品维护/工程过程/实现与测试/branches/v10.3_20120720_sp1/</svn_url>
+        <svn_root>/v10.2二季度产品维护/工程过程/实现与测试/branches/v10.3_20120720_sp1/</svn_root>
+        <branchRoot>/var/patch_build/sp1/</branchRoot>
+        <svn_user>autobuild</svn_user>
+        <svn_password>build@bytter.com</svn_password>
+        <version_no>V10.03.</version_no>
+        <version_pattern>yyMMdd</version_pattern>
+        <version_suffix>beta</version_suffix>
+        <test-users>autobuild;wudd;pangl;guanyq;huy;lixu;lianzhp;huh;liuchp;luoshj;
+            yanhm;zhangchun;zhangff;zhengwk;chengar;dingsl;lishc;lixiao;xieshzh
+            </test-users>
+        <deploy-users>autobuild;pangl</deploy-users>
+    </repository>
+    
+    <!--  兴业银行大补丁分支  -->  
+    <repository>
+        <name>xy</name> 
+        <svn_url>https://192.168.0.2/svn/v101/v10.2二季度产品维护/工程过程/实现与测试/branches/v10.3_20120720_xy/</svn_url>
+        <svn_root>/v10.2二季度产品维护/工程过程/实现与测试/branches/v10.3_20120720_xy/</svn_root>
+        <branchRoot>/var/patch_build/xy/</branchRoot>
+        <svn_user>autobuild</svn_user>
+        <svn_password>build@bytter.com</svn_password>
+        <version_no>V10.03.</version_no>
+        <version_pattern>yyMMdd</version_pattern>
+        <version_suffix>beta</version_suffix>
+        <test-users>autobuild;wudd;pangl;guanyq;huy;lixu;lianzhp;huh;liuchp;luoshj;
+            yanhm;zhangchun;zhangff;zhengwk;chengar;dingsl;lishc;lixiao;xieshzh</test-users>
+        <deploy-users>autobuild;pangl;huh;yanhm;lixu=lixu</deploy-users>
+    </repository>
+</repositories>

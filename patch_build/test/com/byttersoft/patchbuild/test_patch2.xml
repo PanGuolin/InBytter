@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="GBK" ?>
+<build xmlns="http://www.byttersoft.com" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.byttersoft.com patch.xsd">
+
+	<vps>VP0003</vps>
+	<customer>all</customer>
+	<version>sp1</version>
+	<developers>pangl@bytter.com;developer@bytter.com</developers>
+	<testers>pangl@bytter.com;tester@bytter.com</testers>
+	<files>
+	    <file>admin/src/main/java/com/byttersoft/admin/action/BisAccTypeAction.java</file>
+	    <file>admin-api/src/main/java/com/byttersoft/approve/dao/ApproveDao.java</file>
+	    <file>admin/src/main/java/com/byttersoft/admin/form/AccountAuthorForm.java</file>
+	    <file>admin/src/main/webapp/admin/accountAuth.jsp</file>
+	    <file>admin/src/main/webapp/admin/addBank.jsp</file>
+	    <file>admin/src/main/webapp/WEB-INF/classes/spring/spring_adm.xml</file>
+	    <file>admin/src/main/resources/config/quartz.properties</file>
+	</files>
+</build>

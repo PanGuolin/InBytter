@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="GBK" ?>
+<project name="publishApplication" basedir="." default="publish">
+	
+	<property name="dir.project" value="."/>
+	<property name="dir.target" value="E:\web_server\apache-tomcat-5.5.35\webapps\patch"/>
+	
+	<path id="path.compile">
+      <pathelement path="${dir.project}/bin"/>
+      <fileset dir="${dir.project}/webapp/WEB-INF/lib/">
+        <include name="**/*.jar"/>
+        <include name="**/*.zip"/>
+      </fileset>
+    </path>
+	 
+	<target name="publish">
+		<echo>project root: ${dir.project}</echo>
+		<echo>webapp root: ${dir.target}</echo>
+		<delete dir="${dir.project}/webapp/WEB-INF/classes/" failOnError="false"/>
+		<mkdir dir="${dir.project}/webapp/WEB-INF/classes/"/>
+		
+		<javac 
+		    srcdir="${dir.project}/src" 
+		    destdir="${dir.project}/webapp/WEB-INF/classes/"
+		    source="1.5"
+		    target="1.5"
+		    encoding="UTF-8"
+		    includeantruntime="tre"
+		    classpathref="path.compile" 
+		    debug="true"
+		    debuglevel="lines,vars,source" />
+		<copy todir="${dir.project}/webapp/WEB-INF/classes">
+	  		<fileset dir="${dir.project}/src">
+	  		    <exclude name="**/*.java"/>
+	  		</fileset>
+	  	</copy>
+		
+		<delete dir="${dir.target}/WEB-INF/classes" failonerror="false"/>
+		<mkdir dir="${dir.target}"/>
+	  	<copy todir="${dir.target}">
+	  		<fileset dir="${dir.project}/webapp"/>
+	  	</copy>
+	  	
+	</target>
+</project>

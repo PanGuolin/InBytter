@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="GBK" ?>
+<build xmlns="http://www.byttersoft.com" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.byttersoft.com patch.xsd">
+
+	<vps>VP5505</vps>
+	<customer>all</customer>
+	<version>sp1</version>
+	<developers>liujw@bytter.com;developer@bytter.com</developers>
+	<testers>xul@bytter.com;tester@bytter.com</testers>
+	<files>
+		<class module="netbank">com/bettersoft/netbank/elecbill/domain/BalanceBill.java</class>
+    <class module="netbank">com/bettersoft/netbank/elecbill/persistence/iface/BalanceBillDao.java</class>
+    <class module="netbank">com/bettersoft/netbank/elecbill/persistence/sqldaoimpl/BalanceBillDaoImpl.java</class>
+    <class module="netbank">com/bettersoft/netbank/elecbill/presentation/SearchBillBean.java</class>
+    <class module="netbank">com/bettersoft/netbank/elecbill/presentation/BalanceBillBean.java</class>
+    <class module="netbank">com/bettersoft/netbank/elecbill/presentation/EleBillMessage.java</class>
+		<class module="netbank">com/bettersoft/netbank/elecbill/service/BillService.java</class>
+		<class module="netbank">com/bettersoft/netbank/elecbill/util/PagNumManager.java</class>
+		<web module="netbank">netbank/elecbill/allSearchElecbill.jsp</web>
+		<web module="netbank">netbank/elecbill/showBalanceBillList.jsp</web>
+		<web module="netbank">netbank/elecbill/allValidateElecbill.jsp</web>
+		<web module="netbank">netbank/elecbill/showBalanceBillLog.jsp</web>
+		<web module="netbank">netbank/elecbill/validateBalanceBill.jsp</web>
+		<web module="netbank">netbank/elecbill/showBalanceBill.jsp</web>
+		<config module="netbank">struts/struts-config-netbank-elecbill.xml</config>
+	</files>
+</build>
