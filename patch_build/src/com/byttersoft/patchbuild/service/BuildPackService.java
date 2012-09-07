@@ -17,8 +17,8 @@ import java.util.TreeSet;
 import org.apache.tools.ant.util.FileUtils;
 
 import com.byttersoft.patchbuild.PackBuildLogger;
-import com.byttersoft.patchbuild.beans.BuildPackConfig;
-import com.byttersoft.patchbuild.beans.BuildPackInfo;
+import com.byttersoft.patchbuild.beans.BuildConfig;
+import com.byttersoft.patchbuild.beans.BuildFile;
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
 import com.byttersoft.patchbuild.cache.BPICache;
 import com.byttersoft.patchbuild.utils.AntTaskUtil;
@@ -37,7 +37,7 @@ public class BuildPackService {
 	 * @param fileName 不带路径的文件名称
 	 * @return
 	 */
-	public static BuildPackInfo getBuildPackInfo(String branchName, String fileName) {
+	public static BuildFile getBuildPackInfo(String branchName, String fileName) {
 		fileName = fileName.trim();
 		if (!fileName.endsWith(".zip"))
 			fileName = fileName + ".zip";
@@ -53,7 +53,7 @@ public class BuildPackService {
 	 * @param fileName
 	 * @return
 	 */
-	public static BuildPackInfo getBuildPackInfo(String branchName, File file) {
+	public static BuildFile getBuildPackInfo(String branchName, File file) {
 		return BPICache.getBuildPackInfo(branchName, file);
 	}
 
@@ -61,9 +61,9 @@ public class BuildPackService {
 	 * 取消构建包
 	 * @param info 待取消的构建包
 	 */
-	public static void cancel(BuildPackInfo info) {
+	public static void cancel(BuildFile info) {
 		RepositoryInfo repos = BuildReposManager.getByName(info.getBranchName());
-		BuildPackConfig conf = info.getConfig();
+		BuildConfig conf = info.getConfig();
 		File xmlFile = new File(repos.getWorkspace(), "deleted/" + 
 				conf.getId() + "_" + System.currentTimeMillis() + ".xml");
 		try {
@@ -84,8 +84,8 @@ public class BuildPackService {
 	 * @param config 构建包信息
 	 * @return
 	 */
-	public static void checkCanDeploy(BuildPackInfo info) throws Exception{
-		BuildPackConfig config = info.getConfig();
+	public static void checkCanDeploy(BuildFile info) throws Exception{
+		BuildConfig config = info.getConfig();
 		RepositoryInfo reposInfo = BuildReposManager.getByName(config.getVersion());
 		File root = reposInfo.getBuildDir();
 		String[] deps = config.getDepends();
@@ -102,8 +102,8 @@ public class BuildPackService {
 	 * @param id
 	 * @throws Exception
 	 */
-	public static void deployPack(BuildPackInfo info) throws Exception {
-		BuildPackConfig config = info.getConfig();
+	public static void deployPack(BuildFile info) throws Exception {
+		BuildConfig config = info.getConfig();
 		String id = config.getId();
 		RepositoryInfo reposInfo = BuildReposManager.getByName(info.getBranchName());
 		PackBuildLogger logger = new PackBuildLogger(reposInfo, id + "_deploy");
@@ -215,11 +215,11 @@ public class BuildPackService {
 	 * @param branch
 	 * @param dependId
 	 */
-	public static void removeDepend(BuildPackInfo dependedInfo) {
-		BuildPackInfo[] infos = listBildPackInfo(dependedInfo.getBranchName());
+	public static void removeDepend(BuildFile dependedInfo) {
+		BuildFile[] infos = listBildPackInfo(dependedInfo.getBranchName());
 		String id = dependedInfo.getConfig().getId();
-		for (BuildPackInfo info : infos) {
-			BuildPackConfig conf = info.getConfig();
+		for (BuildFile info : infos) {
+			BuildConfig conf = info.getConfig();
 			if (conf.removeDepend(id)) {
 				info.storeConfig();
 			}
@@ -231,7 +231,7 @@ public class BuildPackService {
 	 * @param info
 	 * @param user
 	 */
-	public static void startTest(BuildPackInfo info, String user) {
+	public static void startTest(BuildFile info, String user) {
 		info.getConfig().setTesters(user);
 	}
 	
@@ -240,7 +240,7 @@ public class BuildPackService {
 	 * @param info
 	 * @param user
 	 */
-	public static void testPasss(BuildPackInfo info, String user) {
+	public static void testPasss(BuildFile info, String user) {
 		info.getConfig().setTesters(user);
 		info.getConfig().setPassTS(System.currentTimeMillis());
 	}
@@ -249,7 +249,7 @@ public class BuildPackService {
 	 * 取消测试
 	 * @param info
 	 */
-	public static void cancelTest(BuildPackInfo info) {
+	public static void cancelTest(BuildFile info) {
 		info.getConfig().setTesters(null);
 	}
 	
@@ -259,10 +259,10 @@ public class BuildPackService {
 	 * @param filePattern
 	 * @return
 	 */
-	public static BuildPackInfo[] findBPIByFile(String branch, String filePattern) {
-		BuildPackInfo[] infos = listBildPackInfo(branch);
-		List<BuildPackInfo> list = new ArrayList<BuildPackInfo>();
-		for (BuildPackInfo info : infos) {
+	public static BuildFile[] findBPIByFile(String branch, String filePattern) {
+		BuildFile[] infos = listBildPackInfo(branch);
+		List<BuildFile> list = new ArrayList<BuildFile>();
+		for (BuildFile info : infos) {
 			String[] allFs = info.getConfig().getAllFiles();
 			for (String f : allFs) {
 				if (f.indexOf(filePattern) != -1) {
@@ -271,28 +271,28 @@ public class BuildPackService {
 				}
 			}
 		}
-		return (BuildPackInfo[])list.toArray(new BuildPackInfo[list.size()]);
+		return (BuildFile[])list.toArray(new BuildFile[list.size()]);
 	}
 	
 	/**
 	 * 列出所有已构建的包信息
 	 * @return 不存在则返回长度为0的数组对象
 	 */
-	public static BuildPackInfo[] listBildPackInfo(String branch) {
+	public static BuildFile[] listBildPackInfo(String branch) {
 		
 		RepositoryInfo repos = BuildReposManager.getByName(branch);
-		TreeSet<BuildPackInfo> bpInfos = new TreeSet<BuildPackInfo>();
+		TreeSet<BuildFile> bpInfos = new TreeSet<BuildFile>();
 		File root = repos.getBuildDir();
 		//System.out.println("List from " + root);
 		File[] zips = root.listFiles();
 		if (zips == null  || zips.length == 0) {
 			//System.out.println("[" + branch + "] No build package in dir:" + root);
-			return new BuildPackInfo[0];
+			return new BuildFile[0];
 		}
 		for (File zip : zips) {
 			if (zip.getName().endsWith(".zip")) {
 				try {
-					BuildPackInfo info = getBuildPackInfo(branch, zip.getName());
+					BuildFile info = getBuildPackInfo(branch, zip.getName());
 					if (info != null)
 						bpInfos.add(info);
 				} catch (Exception e) {
@@ -300,7 +300,7 @@ public class BuildPackService {
 				}
 			}
 		}
-		return (BuildPackInfo[])bpInfos.toArray(new BuildPackInfo[bpInfos.size()]);
+		return (BuildFile[])bpInfos.toArray(new BuildFile[bpInfos.size()]);
 	}
 	
 	/**
@@ -309,9 +309,9 @@ public class BuildPackService {
 	 * @return
 	 */
 	public static Set<String> listAllTestingFile(String branch) {
-		BuildPackInfo[] infos = listBildPackInfo(branch);
+		BuildFile[] infos = listBildPackInfo(branch);
 		Set<String> allFiles = new HashSet<String>();
-		for (BuildPackInfo info : infos) {
+		for (BuildFile info : infos) {
 			String[] files = info.getConfig().getAllFiles();
 			for (String f : files) {
 				allFiles.add(f);

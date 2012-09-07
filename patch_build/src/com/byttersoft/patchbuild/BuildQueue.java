@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import com.byttersoft.patchbuild.beans.BuildPackConfig;
+import com.byttersoft.patchbuild.beans.BuildConfig;
 import com.byttersoft.patchbuild.utils.PatchUtil;
 
 /**
@@ -58,13 +58,13 @@ public class BuildQueue extends Thread{
 	
 	private List<String> idList = new ArrayList<String>();
 	
-	private Vector<BuildPackConfig> queue = new Vector<BuildPackConfig>();
+	private Vector<BuildConfig> queue = new Vector<BuildConfig>();
 	
-	public static void addBuild(BuildPackConfig config) throws Exception {
+	public static void addBuild(BuildConfig config) throws Exception {
 		buildQueue.doAddBuild(config);
 	}
 	
-	public void doAddBuild(BuildPackConfig config) throws Exception {
+	public void doAddBuild(BuildConfig config) throws Exception {
 		synchronized (queue) {
 			if (queue.size() > MAX_WAIT_SIZE) {
 				throw new Exception("超过最大等待长度，无法接受新请求！");
@@ -83,7 +83,7 @@ public class BuildQueue extends Thread{
 	@Override
 	public void run() {
 		while(true) {
-			BuildPackConfig config = null;
+			BuildConfig config = null;
 			synchronized (queue) {
 				if (queue.size() > 0) {
 					config = queue.remove(0);

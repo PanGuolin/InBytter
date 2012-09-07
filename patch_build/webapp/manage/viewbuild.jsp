@@ -6,7 +6,7 @@ com.byttersoft.patchbuild.utils.*" %>
 <%
 	String fileName = request.getParameter("fileName");
 	String branch = UserUtil.getBranch(request);
-	BuildPackInfo info = BuildPackService.getBuildPackInfo(branch, fileName);
+	BuildFile info = BuildPackService.getBuildPackInfo(branch, fileName);
 	pageContext.setAttribute("info", info);
 	pageContext.setAttribute("conf", info.getConfig());
 %>

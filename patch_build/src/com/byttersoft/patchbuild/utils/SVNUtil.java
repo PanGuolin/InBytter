@@ -168,19 +168,6 @@ public class SVNUtil {
 	@SuppressWarnings({ "rawtypes", "deprecation" })
 	public static ChangedSVNFiles listChangedFiles(String branch, String[] modules, String[] logPatterns) throws SVNException {
 		
-//		if (offLineMode) {
-//			return new String[] {"admin/src/main/java/com/byttersoft/admin/action/BisAccTypeAction.java",
-//					"admin-api/src/main/java/com/byttersoft/approve/dao/ApproveDao.java",
-//					"admin/src/main/java/com/byttersoft/admin/form/AccountAuthorForm.java",
-//					"admin/src/main/webapp/admin/accountAuth.jsp",
-//					"admin/src/main/webapp/admin/addBank.jsp",
-//					"admin/src/main/webapp/WEB-INF/classes/spring/spring_adm.xml",
-//					"admin/src/main/resources/config/quartz.properties",
-//			};
-//		}
-		
-		
-		
 		RepositoryInfo repos = BuildReposManager.getByName(branch);
 		if (modules== null || modules.length == 0)
 			modules = repos.getProjects();

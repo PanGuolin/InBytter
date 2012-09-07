@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.jdom.Document;
@@ -19,7 +18,7 @@ import org.jdom.input.SAXBuilder;
  * @author MickeyMic
  *
  */
-public class BuildPackConfig {
+public class BuildConfig {
 	
 	public static final String DIR_JAVA = "/src/main/java/";
 	
@@ -27,39 +26,18 @@ public class BuildPackConfig {
 	
 	public static final String DIR_WEB = "/src/main/webapp/";
 	
-	/**
-	 * ����ID��
-	 */
 	private String id;
 	
-	/**
-	 * ���ÿͻ�
-	 */
 	private String customer = "all";
 	
-	/**
-	 * javaԴ�ļ��б?���Դ�ļ�֮���÷ֺ�����
-	 */
 	private String javaFiles = "";
 	
-	/**
-	 * WEB�ļ��б?����ļ�֮���÷ֺ�����
-	 */
 	private String webFiles = "";
 	
-	/**
-	 * ��Դ�ļ��б?����ļ�֮���÷ֺ�����
-	 */
 	private String resourceFiles = "";
 	
-	/**
-	 * CS�ͻ����ļ��б?����ļ�֮���÷ֺ�����
-	 */
 	private String csFiles = "";
 	
-	/**
-	 * ��Ӧ��VP���б�
-	 */
 	private String vps = "";
 	
 	private String version = "";
@@ -88,7 +66,7 @@ public class BuildPackConfig {
 	 */
 	private String comment;
 	
-	public BuildPackConfig(){
+	public BuildConfig(){
 		
 	}
 	
@@ -100,8 +78,8 @@ public class BuildPackConfig {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static BuildPackConfig readFromStream(InputStream in, String id) throws Exception{
-		BuildPackConfig config = new BuildPackConfig();
+	public static BuildConfig readFromStream(InputStream in, String id) throws Exception{
+		BuildConfig config = new BuildConfig();
 		config.id = id;
 		
 		SAXBuilder builder=new SAXBuilder(false);
@@ -153,7 +131,7 @@ public class BuildPackConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BuildPackConfig readFromFile(File xmlFile) throws Exception{
+	public static BuildConfig readFromFile(File xmlFile) throws Exception{
 		String id = xmlFile.getName();
 		if (id.indexOf(".") > 0) {
 			id = id.substring(0, id.lastIndexOf('.'));
@@ -168,10 +146,13 @@ public class BuildPackConfig {
 
 
 	public String toString() {
-		Properties prop = toProperties("_pathConfig.");
-		return prop.toString();
+		return toXML();
 	}
 	
+	/**
+	 * 输出XML格式的内容
+	 * @return
+	 */
 	public String toXML() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"GBK\" ?>\r\n");
@@ -218,36 +199,6 @@ public class BuildPackConfig {
 		}
 		sb.append("</build>");
 		return sb.toString();
-	}
-	
-	/**
-	 * �����Properties����
-	 * @param prefix KEY��ǰ׺
-	 * @return
-	 */
-	public Properties toProperties(String prefix) {
-		Properties prop = new Properties();
-		prop.put(prefix + "id", id);
-		prop.put(prefix + "vps", vps);
-		prop.put(prefix + "customer", customer);
-		prop.put(prefix + "version", version);
-		prop.put(prefix + "testers", testers);
-		prop.put(prefix + "developers", developers);
-		prop.put(prefix + "modules", modules);
-		prop.put(prefix + "javaFiles", javaFiles);
-		prop.put(prefix + "webFiles", webFiles);
-		prop.put(prefix + "csFiles", csFiles);
-		prop.put(prefix + "resourceFiles", resourceFiles);
-		StringBuilder sb = new StringBuilder();
-		sb.append(javaFiles);
-		if (webFiles.length() > 0)
-			sb.append(";" + webFiles);
-		if (resourceFiles.length() > 0)
-			sb.append(";" + resourceFiles);
-		if (csFiles.length() > 0)
-			sb.append(";" + csFiles);
-		prop.put(prefix + "allFiles", sb.toString() );
-		return prop;
 	}
 	
 	/**
@@ -418,9 +369,9 @@ public class BuildPackConfig {
 			return true;
 		if (o == null)
 			return false;
-		if (!(o instanceof BuildPackConfig))
+		if (!(o instanceof BuildConfig))
 			return false;
-		BuildPackConfig conf = (BuildPackConfig)o;
+		BuildConfig conf = (BuildConfig)o;
 		return id.equals(conf.id);
 	}
 	

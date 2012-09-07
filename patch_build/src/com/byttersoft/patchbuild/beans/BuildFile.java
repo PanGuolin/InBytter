@@ -15,11 +15,11 @@ import com.byttersoft.patchbuild.service.BuildReposManager;
 import com.byttersoft.patchbuild.utils.AntTaskUtil;
 
 /**
- * 构建包信息
+ * 构建包文件对象
  * @author pangl
  *
  */
-public class BuildPackInfo implements Comparable<BuildPackInfo>, Cacheable{
+public class BuildFile implements Comparable<BuildFile>, Cacheable{
 	
 	/**
 	 * 所属分支
@@ -32,7 +32,7 @@ public class BuildPackInfo implements Comparable<BuildPackInfo>, Cacheable{
 	private File file;
 	
 	
-	private BuildPackConfig config;
+	private BuildConfig config;
 	
 	/**
 	 * 是否包含SQL文件
@@ -50,7 +50,7 @@ public class BuildPackInfo implements Comparable<BuildPackInfo>, Cacheable{
 	 * @param branch 所属分支
 	 * @param file 构建包文件，以ZIP格式压缩
 	 */
-	public BuildPackInfo(String branchName, File file) throws Exception{
+	public BuildFile(String branchName, File file) throws Exception{
 		this.branchName = branchName;
 		this.file = file;
 		reload();
@@ -99,7 +99,7 @@ public class BuildPackInfo implements Comparable<BuildPackInfo>, Cacheable{
 		return config.getVps();
 	}
 
-	public int compareTo(BuildPackInfo o) {
+	public int compareTo(BuildFile o) {
 		int res = branchName.compareTo(o.branchName);
 		if (res == 0)
 			res = getBuildTime().compareTo(o.getBuildTime());
@@ -109,7 +109,7 @@ public class BuildPackInfo implements Comparable<BuildPackInfo>, Cacheable{
 	}
 
 
-	public BuildPackConfig getConfig() {
+	public BuildConfig getConfig() {
 		return config;
 	}
 	
@@ -125,7 +125,7 @@ public class BuildPackInfo implements Comparable<BuildPackInfo>, Cacheable{
 		if (isStoring || !file.exists()) return;
 		Thread t = new Thread("store" + config.getId()) {
 			public void run() {
-				synchronized (BuildPackInfo.class) {
+				synchronized (BuildFile.class) {
 					isStoring = true;
 					String name = file.getName();
 					name = name.substring(0, name.lastIndexOf('.'));
@@ -167,7 +167,7 @@ public class BuildPackInfo implements Comparable<BuildPackInfo>, Cacheable{
 		try {
 			ZipEntry entry = zipFile.getEntry(name + ".xml");
 			if (entry != null) {
-				this.config = BuildPackConfig.readFromStream(zipFile.getInputStream(entry), name);
+				this.config = BuildConfig.readFromStream(zipFile.getInputStream(entry), name);
 				Enumeration<? extends ZipEntry> enu = zipFile.entries();
 				while(enu.hasMoreElements()) {
 					ZipEntry ze = enu.nextElement();

@@ -6,7 +6,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import com.byttersoft.patchbuild.beans.BuildPackInfo;
+import com.byttersoft.patchbuild.beans.BuildFile;
 
 /**
  * Build Package Info Cache Manager
@@ -20,7 +20,7 @@ public abstract class BPICache {
 	
 	private static long EXPIRE_INTERVAL = 60*60*1000;
 	
-	private static Map<File, BuildPackInfo> infos = new Hashtable<File, BuildPackInfo>();
+	private static Map<File, BuildFile> infos = new Hashtable<File, BuildFile>();
 	
 	/**
 	 * 获取一个BuildPackInfo对象，并视条件进行缓存
@@ -29,18 +29,18 @@ public abstract class BPICache {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BuildPackInfo getBuildPackInfo(String branchName, File file) {
+	public static BuildFile getBuildPackInfo(String branchName, File file) {
 		if (!file.exists()) {
 			infos.remove(file);
 			return null;
 		}
-		BuildPackInfo info = infos.get(file);
+		BuildFile info = infos.get(file);
 		if (info == null) {
 			synchronized (infos) {
 				 info = infos.get(file);
 				 if (info == null) {
 					 try {
-						info = new BuildPackInfo(branchName, file);
+						info = new BuildFile(branchName, file);
 						addInfo(file, info);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -60,7 +60,7 @@ public abstract class BPICache {
 		return info;
 	}
 	
-	public static void remove(BuildPackInfo info) {
+	public static void remove(BuildFile info) {
 		synchronized (infos) {
 			infos.remove(info.getFile());
 		}
@@ -71,13 +71,13 @@ public abstract class BPICache {
 	 * @param file
 	 * @param info
 	 */
-	private static void addInfo(File file, BuildPackInfo info) {
+	private static void addInfo(File file, BuildFile info) {
 		if (infos.size() >= MAX_CACHE_SIZE) {
 			synchronized (infos) {
 				Set<File> removeKeys = new HashSet<File>();
 				long ts = System.currentTimeMillis() - EXPIRE_INTERVAL;
 				for (File f : infos.keySet()) {
-					BuildPackInfo ifo = infos.get(f);
+					BuildFile ifo = infos.get(f);
 					if (ifo.getLastUseTime() < ts) {
 						removeKeys.add(f);
 					}

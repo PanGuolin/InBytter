@@ -5,13 +5,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
-import com.byttersoft.patchbuild.beans.BuildPackConfig;
+import com.byttersoft.patchbuild.beans.BuildConfig;
 
 import junit.framework.TestCase;
 
 /**
  * Test for PatchConfig
- * @see BuildPackConfig
+ * @see BuildConfig
  * @author pangl
  *
  */
@@ -19,11 +19,11 @@ public class PatchConfigTest extends TestCase{
 	
 	public void test_readFromFile() throws Exception {
 		InputStream in = PatchConfigTest.class.getResourceAsStream("test_patch1.xml");
-		BuildPackConfig config = BuildPackConfig.readFromStream(in, "test_patch1");
+		BuildConfig config = BuildConfig.readFromStream(in, "test_patch1");
 		Properties prop1 = config.toProperties("_");
 		
 		in = PatchConfigTest.class.getResourceAsStream("test_patch2.xml");
-		config = BuildPackConfig.readFromStream(in, "test_patch2");
+		config = BuildConfig.readFromStream(in, "test_patch2");
 		Properties prop2 = config.toProperties("_");
 		
 		assertEquals(prop1.get("_allFiles"), prop2.get("_allFiles"));
@@ -58,17 +58,17 @@ public class PatchConfigTest extends TestCase{
 	public void test_readFromFile2() throws Exception {
 		
 		InputStream in = PatchConfigTest.class.getResourceAsStream("test_old.xml");
-		BuildPackConfig config = BuildPackConfig.readFromStream(in, "test_patch1");
+		BuildConfig config = BuildConfig.readFromStream(in, "test_patch1");
 		Properties prop1 = config.toProperties("_");
 		assertTrue(true);
 	}
 	
 	public void test_toXML() throws Exception {
 		InputStream in = PatchConfigTest.class.getResourceAsStream("test_old.xml");
-		BuildPackConfig config = BuildPackConfig.readFromStream(in, "test_patch1");
+		BuildConfig config = BuildConfig.readFromStream(in, "test_patch1");
 		String xml = config.toXML();
 		ByteArrayInputStream input = new ByteArrayInputStream(xml.getBytes());
-		BuildPackConfig config2 = BuildPackConfig.readFromStream(input, "test_patch1");
+		BuildConfig config2 = BuildConfig.readFromStream(input, "test_patch1");
 		assertEquals(config.toString(), config2.toString());
 	}
 		

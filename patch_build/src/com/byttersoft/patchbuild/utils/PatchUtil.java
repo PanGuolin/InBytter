@@ -16,8 +16,8 @@ import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.util.FileUtils;
 
 import com.byttersoft.patchbuild.PackBuildLogger;
-import com.byttersoft.patchbuild.beans.BuildPackConfig;
-import com.byttersoft.patchbuild.beans.BuildPackInfo;
+import com.byttersoft.patchbuild.beans.BuildConfig;
+import com.byttersoft.patchbuild.beans.BuildFile;
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
 import com.byttersoft.patchbuild.service.BuildPackService;
 import com.byttersoft.patchbuild.service.BuildReposManager;
@@ -42,7 +42,7 @@ public class PatchUtil {
 	/**
 	 * 构建补丁包
 	 */
-	public static void buildPackage(BuildPackConfig config) throws Exception{
+	public static void buildPackage(BuildConfig config) throws Exception{
 		
 		RepositoryInfo repos = BuildReposManager.getByName(config.getVersion());
 		PackBuildLogger logger = new PackBuildLogger(repos, config.getId());
@@ -56,10 +56,10 @@ public class PatchUtil {
 				throw new Exception("存在待测试构建包，请先取消测试再进行构建：" +zipName);
 			}
 			
-			BuildPackInfo[] infos = BuildPackService.listBildPackInfo(config.getVersion());
+			BuildFile[] infos = BuildPackService.listBildPackInfo(config.getVersion());
 			String[] bFiles = config.getAllFiles();
-			for (BuildPackInfo info : infos) {
-				BuildPackConfig bConfig = info.getConfig();
+			for (BuildFile info : infos) {
+				BuildConfig bConfig = info.getConfig();
 				for (String bf : bFiles) {
 					if (bConfig.containsFile(bf)) {
 						config.addDepend(bConfig.getId());
@@ -101,7 +101,7 @@ public class PatchUtil {
 	 * @param config 构建包信息
 	 * @return
 	 */
-	public static void checkCanDeploy(BuildPackConfig config) throws Exception{
+	public static void checkCanDeploy(BuildConfig config) throws Exception{
 		RepositoryInfo reposInfo = BuildReposManager.getByName(config.getVersion());
 		File root = reposInfo.getBuildDir();
 		String[] deps = config.getDepends();
@@ -203,7 +203,7 @@ public class PatchUtil {
 	 * @param config
 	 * @throws IOException
 	 */
-	private static void copy4BuildPack(BuildPackConfig config, PackBuildLogger logger) throws IOException {
+	private static void copy4BuildPack(BuildConfig config, PackBuildLogger logger) throws IOException {
 		
 		File packDir = getPackDir(config);
 		doCopy(config, config.getWebFileList(), "/src/main/webapp/", new File(packDir, "web"), logger);
@@ -234,7 +234,7 @@ public class PatchUtil {
 	 * @param destDir
 	 * @throws IOException
 	 */
-	private static void doCopy(BuildPackConfig config, String[] files, String subDir, File destDir, PackBuildLogger logger) throws IOException {
+	private static void doCopy(BuildConfig config, String[] files, String subDir, File destDir, PackBuildLogger logger) throws IOException {
 		if (files == null || files.length == 0)
 			return;
 		if (!destDir.exists())
@@ -272,7 +272,7 @@ public class PatchUtil {
 	 * @param config
 	 * @return
 	 */
-	private static File getTempDir(BuildPackConfig config) {
+	private static File getTempDir(BuildConfig config) {
 		RepositoryInfo repos = BuildReposManager.getByName(config.getVersion());
 		File dir =  new File(repos.getWorkspace(), "temp/" + config.getId());
 		if (!dir.exists())
@@ -280,7 +280,7 @@ public class PatchUtil {
 		return dir;
 	}
 	
-	private static File getPackDir(BuildPackConfig config) {
+	private static File getPackDir(BuildConfig config) {
 		File dir =   new File((getTempDir(config)), "pack");
 		if (!dir.exists())
 			dir.mkdirs();
@@ -292,7 +292,7 @@ public class PatchUtil {
 	 * @param config
 	 * @throws IOException
 	 */
-	private static void compileJava(BuildPackConfig config, PackBuildLogger logger) throws IOException {
+	private static void compileJava(BuildConfig config, PackBuildLogger logger) throws IOException {
 		
 		if (config.getJavaFileList().length == 0)
 			return;

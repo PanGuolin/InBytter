@@ -10,7 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.byttersoft.patchbuild.beans.BuildPackInfo;
+import com.byttersoft.patchbuild.beans.BuildFile;
 import com.byttersoft.patchbuild.service.BuildPackService;
 import com.byttersoft.patchbuild.utils.UserUtil;
 
@@ -50,7 +50,7 @@ public class BuildManagerServlet extends HttpServlet{
 			return;
 		}
 		
-		BuildPackInfo info = BuildPackService.getBuildPackInfo(branch, fileName);
+		BuildFile info = BuildPackService.getBuildPackInfo(branch, fileName);
 		long ts = info.addChangeLog(UserUtil.getUserName(req), action);
 		HttpSession session = req.getSession();
 		String desc = "分支[" + branch + "] 的构建包[" + fileName + "]";
@@ -92,7 +92,7 @@ public class BuildManagerServlet extends HttpServlet{
 		String action = req.getParameter("action");
 		String branch = UserUtil.getBranch(req);
 		String fileName = req.getParameter("fileName");
-		BuildPackInfo info = BuildPackService.getBuildPackInfo(branch, fileName);
+		BuildFile info = BuildPackService.getBuildPackInfo(branch, fileName);
 		String userName = UserUtil.getUserName(req);
 		
 		if (action.equals("cancel") || action.equals("test") || action.equals("pass") || action.equals("canceltest")) {

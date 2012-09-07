@@ -7,8 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.TreeSet;
 
 import com.byttersoft.code.Base64Util;
-import com.byttersoft.patchbuild.beans.BuildPackInfo;
-import com.byttersoft.patchbuild.beans.PatchInfo;
+import com.byttersoft.patchbuild.beans.BuildFile;
+import com.byttersoft.patchbuild.beans.PatchFile;
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
 import com.byttersoft.patchbuild.utils.PatchUtil;
 
@@ -48,7 +48,7 @@ public class PatchService {
 	 * @param branch 分支名称
 	 * @return
 	 */
-	public static PatchInfo[] listPachInfo(String branch) {
+	public static PatchFile[] listPachInfo(String branch) {
 		RepositoryInfo repos = BuildReposManager.getByName(branch);
 		File file = repos.getDeployDir();
 		File[] patchs = file.listFiles(new FileFilter() {
@@ -56,23 +56,15 @@ public class PatchService {
 				return pathname.getName().endsWith(".zip");
 			}
 		});
-		TreeSet<PatchInfo> pInfos = new TreeSet<PatchInfo>();
+		TreeSet<PatchFile> pInfos = new TreeSet<PatchFile>();
 		if (patchs != null) {
 			for (File f : patchs) {
 				if (f.isDirectory() || f.getName().equals("latest.zip"))
 					continue;
-				PatchInfo info = new PatchInfo();
-				info.setBranch(branch);
-				info.setFile(f);
-				try {
-					File[] fs = getRootOfBPByPatch(branch, f.getName()).listFiles();
-					if (fs != null)
-						info.setIncludePBSize(fs.length);
-				} catch (Exception ex) {ex.printStackTrace();}
-				pInfos.add(info);
+				pInfos.add(PatchFile.getPatchFile(file, branch));
 			}
 		}
-		return (PatchInfo[])pInfos.toArray(new PatchInfo[pInfos.size()]);
+		return (PatchFile[])pInfos.toArray(new PatchFile[pInfos.size()]);
 		
 	}
 	
@@ -102,25 +94,25 @@ public class PatchService {
 	 * @return
 	 * @throws ParseException 
 	 */
-	public static BuildPackInfo[] listBuildPackInfoOfPatch(String branch, String patchName) throws ParseException {
+	public static BuildFile[] listBuildPackInfoOfPatch(String branch, String patchName) throws ParseException {
 		
 		File[] zips = getRootOfBPByPatch(branch, patchName).listFiles();
 		if (zips == null  || zips.length == 0) {
-			return new BuildPackInfo[0];
+			return new BuildFile[0];
 		}
 		
-		TreeSet<BuildPackInfo> bpInfos = new TreeSet<BuildPackInfo>();
+		TreeSet<BuildFile> bpInfos = new TreeSet<BuildFile>();
 		for (File zip : zips) {
 			if (zip.getName().endsWith(".zip")) {
 				try {
-					BuildPackInfo info = BuildPackService.getBuildPackInfo(branch, zip);
+					BuildFile info = BuildPackService.getBuildPackInfo(branch, zip);
 					bpInfos.add(info);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		return (BuildPackInfo[])bpInfos.toArray(new BuildPackInfo[bpInfos.size()]);
+		return (BuildFile[])bpInfos.toArray(new BuildFile[bpInfos.size()]);
 	}
 	
 }

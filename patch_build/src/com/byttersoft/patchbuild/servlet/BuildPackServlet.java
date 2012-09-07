@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.byttersoft.patchbuild.BuildQueue;
-import com.byttersoft.patchbuild.beans.BuildPackConfig;
+import com.byttersoft.patchbuild.beans.BuildConfig;
 import com.byttersoft.patchbuild.utils.UserUtil;
 
 /**
@@ -33,7 +33,7 @@ public class BuildPackServlet extends HttpServlet{
 			comment = comment.replaceAll("<", "&lt;");
 		}
 		
-		BuildPackConfig config = new BuildPackConfig();
+		BuildConfig config = new BuildConfig();
 		config.setVersion(UserUtil.getBranch(req));
 		config.setDevelopers(UserUtil.getUserName(req));
 		config.setCustomer("all");
