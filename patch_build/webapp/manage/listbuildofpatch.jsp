@@ -4,8 +4,8 @@ com.byttersoft.patchbuild.utils.*"%>
 <%@ include file="/header.jsp"%>
 <%
 	String patch = request.getParameter("patch");
-	pageContext.setAttribute("infos", PatchService
-			.listBuildPackInfoOfPatch(UserUtil.getBranch(request), patch));
+	pageContext.setAttribute("infos", PatchFileService
+	.listBuildPackInfoOfPatch(UserUtil.getBranch(request), patch));
 	pageContext.setAttribute("patch", patch);
 %>
 	<table border="1px" cellspacing="0px" cellpadding="0px" id="tb_package">
@@ -30,7 +30,7 @@ com.byttersoft.patchbuild.utils.*"%>
 </table>
 <div id="menuDiv">
 <ul>
-	<li><a href="${contextPath}/manage/getFile.do?fileofpatch=%FILENAME%">下载历史构建包</a></li>
+	<li><a href="${contextPath}/manage/getFile.do?type=dbuild&filename=%FILENAME%">下载历史构建包</a></li>
 </ul>
 </div>
 <form action="${contextPath}/manage/buildManage.do" id="manageForm" method="POST">

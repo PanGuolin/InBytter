@@ -19,7 +19,7 @@ import com.byttersoft.patchbuild.PackBuildLogger;
 import com.byttersoft.patchbuild.beans.BuildConfig;
 import com.byttersoft.patchbuild.beans.BuildFile;
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
-import com.byttersoft.patchbuild.service.BuildPackService;
+import com.byttersoft.patchbuild.service.BuildFileService;
 import com.byttersoft.patchbuild.service.BuildReposManager;
 
 /**
@@ -56,7 +56,7 @@ public class PatchUtil {
 				throw new Exception("存在待测试构建包，请先取消测试再进行构建：" +zipName);
 			}
 			
-			BuildFile[] infos = BuildPackService.listBildPackInfo(config.getVersion());
+			BuildFile[] infos = BuildFileService.listBildPackInfo(config.getVersion());
 			String[] bFiles = config.getAllFiles();
 			for (BuildFile info : infos) {
 				BuildConfig bConfig = info.getConfig();

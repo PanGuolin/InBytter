@@ -3,10 +3,10 @@
 com.byttersoft.patchbuild.utils.*" %>
 <%@ include file="/header.jsp"%>
 <%
-String pattern = request.getParameter("pattern");
+	String pattern = request.getParameter("pattern");
 if (pattern != null && pattern.trim().length() > 0) {
 	pageContext.setAttribute("pattern", pattern);
-	pageContext.setAttribute("infos", BuildPackService.findBPIByFile(UserUtil.getBranch(request), pattern));
+	pageContext.setAttribute("infos", BuildFileService.findBPIByFile(UserUtil.getBranch(request), pattern));
 }
 %>
 	<div>
@@ -64,7 +64,7 @@ if (pattern != null && pattern.trim().length() > 0) {
 	
 <div id="menuDiv">
 <ul>
-	<li><a href="${contextPath}/manage/getFile.do?fileName=%FILENAME%">下载</a>
+	<li><a href="${contextPath}/manage/getFile.do?filename=%FILENAME%">下载</a>
 		<span class="tips">下载构建包内容以便测试</span></li>
 	<li><a href="${contextPath}/manage/viewbuild.jsp?fileName=%FILENAME%">查看详细信息</a>
 		<span class="tips">查看构建包的详细信息，包括构建说明及历史等</span></li>

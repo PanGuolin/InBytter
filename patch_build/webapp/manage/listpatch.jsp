@@ -2,7 +2,7 @@
 <%@page import="com.byttersoft.patchbuild.service.*,
 com.byttersoft.patchbuild.utils.*" %>
 <%
-	pageContext.setAttribute("infos", PatchService.listPachInfo(UserUtil.getBranch(request)));
+	pageContext.setAttribute("infos", PatchFileService.listPachInfo(UserUtil.getBranch(request)));
 %>
 <%@ include file="/header.jsp"%>
 	<table border="1px" cellspacing="0px" cellpadding="0px" id="tb_package">
@@ -25,8 +25,8 @@ com.byttersoft.patchbuild.utils.*" %>
 </table>
 <div id="menuDiv">
 <ul>
-	<li><a href="${contextPath}/manage/getFile.do?patchname=%INFONAME%">下载原始补丁</a></li>
-	<li><a href="${contextPath}/manage/getFile.do?enpatchname=%INFONAME%">下载加密补丁</a></li>
+	<li><a href="${contextPath}/manage/getFile.do?type=patch&filename=%INFONAME%">下载原始补丁</a></li>
+	<li><a href="${contextPath}/manage/getFile.do?type=epatch&filename=%INFONAME%">下载加密补丁</a></li>
 	<li><a href="${contextPath}/manage/listbuildofpatch.jsp?patch=%INFONAME%">查看构建包列表</a></li>
 </ul>
 </div>

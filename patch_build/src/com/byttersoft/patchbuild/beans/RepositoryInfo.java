@@ -159,6 +159,14 @@ public class RepositoryInfo {
 			buildDir = new File(branchRoot, "build");
 		return buildDir;
 	}
+	
+	/**
+	 * 私家包存放地址
+	 * @return
+	 */
+	public File getPrivateDir() {
+		return new File(branchRoot, "private");
+	}
 
 	public void setBuildDir(File buildDir) {
 		this.buildDir = buildDir;

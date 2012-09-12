@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
+import com.byttersoft.patchbuild.command.UserRole;
 import com.byttersoft.patchbuild.service.BuildReposManager;
 
 /**
@@ -105,6 +106,25 @@ public abstract class UserUtil {
 	
 	public static boolean isAmdin(HttpServletRequest request) {
 		return false;
+	}
+	
+	/**
+	 * 检查用户是否拥有指定角色
+	 * @param userName
+	 * @param role
+	 * @return
+	 */
+	public static boolean checkRole(String branch, String userName, UserRole role) {
+		switch (role) {
+			case admin:
+				return false;
+			case deployer:
+				return isDeployer(userName, branch);
+			case tester:
+				return isTester(userName, branch);
+			default:
+				return false;
+		}
 	}
 	
 	public static final String KEY_SESSION_USERNAME = "session_username";

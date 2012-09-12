@@ -1,6 +1,7 @@
 package com.byttersoft.patchbuild.beans;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
@@ -113,6 +114,16 @@ public class BuildFile implements Comparable<BuildFile>, Cacheable{
 		return config;
 	}
 	
+	/**
+	 * 替换内容
+	 * @param contextXML
+	 */
+	public void updateConfig(String contextXML) throws Exception {
+		ByteArrayInputStream in = new ByteArrayInputStream(contextXML.getBytes());
+		BuildConfig config = BuildConfig.readFromStream(in, getConfig().getId());
+		this.config = config;
+	}
+	
 	public boolean getIncludeSqls() {
 		return this.includeSqls;
 	}
@@ -146,8 +157,8 @@ public class BuildFile implements Comparable<BuildFile>, Cacheable{
 					}
 					lastLoadTime = file.lastModified();
 					updateUseTime();
-					isStoring = false;
 					root.delete();
+					isStoring = false;
 				}
 			}
 		};
@@ -181,7 +192,10 @@ public class BuildFile implements Comparable<BuildFile>, Cacheable{
 		}
 		this.lastLoadTime = file.lastModified();
 	}
-	 
+	
+	public boolean hasTester() {
+		return getTester().length() > 0;
+	}
 	public String getTester() {
 		String t = config.getTesters();
 		if ("null".equals(t))
@@ -214,9 +228,5 @@ public class BuildFile implements Comparable<BuildFile>, Cacheable{
 			chs[i] = log.getLog();
 		}
 		return chs;
-	}
-	
-	public void rollbackChange(long ts) {
-		config.rollbackChange(ts);
 	}
 }

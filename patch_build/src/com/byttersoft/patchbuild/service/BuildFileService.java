@@ -1,12 +1,12 @@
 package com.byttersoft.patchbuild.service;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -29,7 +29,7 @@ import com.byttersoft.patchbuild.utils.PatchUtil;
  * @author pangl
  *
  */
-public class BuildPackService {
+public class BuildFileService {
 	
 	/**
 	 * 获取指定分支上的一个BuildPackInfo对象
@@ -39,6 +39,8 @@ public class BuildPackService {
 	 */
 	public static BuildFile getBuildPackInfo(String branchName, String fileName) {
 		fileName = fileName.trim();
+		if (fileName.length() == 0)
+			return null;
 		if (!fileName.endsWith(".zip"))
 			fileName = fileName + ".zip";
 		RepositoryInfo info = BuildReposManager.getByName(branchName);
@@ -57,28 +59,6 @@ public class BuildPackService {
 		return BPICache.getBuildPackInfo(branchName, file);
 	}
 
-	/**
-	 * 取消构建包
-	 * @param info 待取消的构建包
-	 */
-	public static void cancel(BuildFile info) {
-		RepositoryInfo repos = BuildReposManager.getByName(info.getBranchName());
-		BuildConfig conf = info.getConfig();
-		File xmlFile = new File(repos.getWorkspace(), "deleted/" + 
-				conf.getId() + "_" + System.currentTimeMillis() + ".xml");
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(xmlFile));
-			writer.write(conf.toXML());
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		info.getFile().delete();
-		removeDepend(info);
-		BPICache.remove(info);
-	}
-	
 	/**
 	 * 判断某个构建包是否可以发布
 	 * @param config 构建包信息
@@ -126,7 +106,7 @@ public class BuildPackService {
 			AntTaskUtil.zip(tempBackDir, backFile, logger);
 			
 			//合并发布包
-			synchronized (BuildPackService.class) {
+			synchronized (BuildFileService.class) {
 				String patchName = reposInfo.getVersionNo() +
 						(reposInfo.getVersionPattern() == null ? "" : new SimpleDateFormat(reposInfo.getVersionPattern()).format(curDate)) +
 						reposInfo.getVersionSuffix();
@@ -236,16 +216,6 @@ public class BuildPackService {
 	}
 	
 	/**
-	 * 声明测试通过
-	 * @param info
-	 * @param user
-	 */
-	public static void testPasss(BuildFile info, String user) {
-		info.getConfig().setTesters(user);
-		info.getConfig().setPassTS(System.currentTimeMillis());
-	}
-	
-	/**
 	 * 取消测试
 	 * @param info
 	 */
@@ -318,5 +288,80 @@ public class BuildPackService {
 			}
 		}
 		return allFiles;
+	}
+	
+	/**
+	 * 生成私家包并返回文件路径
+	 * @param branchName
+	 * @param file
+	 * @return
+	 * @throws IOException 
+	 */
+	public static File getPrivateFile(String branchName, String file)  {
+		RepositoryInfo repos = BuildReposManager.getByName(branchName);
+		BuildFile buildFile = getBuildPackInfo(branchName, file);
+		
+		BuildConfig config = buildFile.getConfig();
+		String[] depends = config.getDepends();
+		if (depends != null) {
+			List<String> dependList = new ArrayList<String>();
+			dependList.addAll(Arrays.asList(depends));
+			retriveDepends(buildFile, dependList);
+			depends = (String[])dependList.toArray(new String[dependList.size()]);
+		}
+		
+		File ws = repos.getWorkspace();
+		File root = new File(ws, "privateBuild" + buildFile.getConfig().getId() + System.currentTimeMillis());
+		root.mkdirs();
+		
+		StringBuilder sb = new StringBuilder();
+		if (depends != null) {
+			for (int i=depends.length - 1; i >=0; i--) {
+				BuildFile depFile = BuildFileService.getBuildPackInfo(buildFile.getBranchName(), depends[i]);
+				if (depFile != null) {
+					AntTaskUtil.unzip(depFile.getFile(), root, null);
+					sb.append(depends[i] + "\r\n");
+				}
+			}
+		}
+		try {
+			FileWriter writer = new FileWriter(new File(root, config.getId() + "_depends.txt"));
+			writer.write(sb.toString());
+			writer.flush();
+			writer.close();
+		} catch (Exception ex) {
+			//此处不做处理，如果写入错误则简单忽略，不影响流程
+			ex.printStackTrace();
+		}
+		AntTaskUtil.unzip(buildFile.getFile(), root, null);
+		
+		File targetFile = new File(repos.getPrivateDir(), "private_" + buildFile.getFileName());
+		AntTaskUtil.zip(root, targetFile, null);
+		
+		AntTaskUtil.deleteDir(root, null);
+		return targetFile;
+	}
+	
+	/**
+	 * 获取所有依赖的构建包对象，被依赖的构建包放在列表后面
+	 * @param depends
+	 * @param buildFile
+	 */
+	private static void retriveDepends(BuildFile buildFile, List<String> dependList) {
+		String[] depends = buildFile.getConfig().getDepends();
+		if (depends != null) {
+			for (String depend : depends) {
+				BuildFile depFile = BuildFileService.getBuildPackInfo(buildFile.getBranchName(), depend);
+				if (depFile == null) 
+					continue;
+				String id = depFile.getConfig().getId();
+				//被依赖的包移到最后
+				if (dependList.contains(id)) {
+					dependList.remove(id);
+				}
+				dependList.add(id);
+				retriveDepends(depFile, dependList);
+			}
+		}
 	}
 }

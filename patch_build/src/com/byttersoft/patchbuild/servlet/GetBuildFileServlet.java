@@ -14,8 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
+import com.byttersoft.patchbuild.service.BuildFileService;
 import com.byttersoft.patchbuild.service.BuildReposManager;
-import com.byttersoft.patchbuild.service.PatchService;
+import com.byttersoft.patchbuild.service.PatchFileService;
 import com.byttersoft.patchbuild.utils.UserUtil;
 
 /**
@@ -54,52 +55,39 @@ public class GetBuildFileServlet extends HttpServlet{
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		
+		String type = req.getParameter("type");
+		String fileName = req.getParameter("filename");
 		String branch = UserUtil.getBranch(req);
-		String fileName = null;
 		RepositoryInfo repos = BuildReposManager.getByName(branch);
+		DownloadFileType fileType = DownloadFileType.valueOf(type);
+		
 		File file = null;
-		if (file == null) {
-			//获取构建包
-			fileName = req.getParameter("fileName");
-			if (fileName != null) {
-				file = new File(repos.getBuildDir(), fileName);
+		switch (fileType) {
+		case build:
+			file = new File(repos.getBuildDir(), fileName);
+			break;
+		case dbuild:
+			String[] ps = fileName.split("/");
+			try {
+				File root = PatchFileService.getRootOfBPByPatch(branch, ps[0]);
+				file = new File(root, ps[1]);
+			} catch (ParseException e) {
+				e.printStackTrace();
 			}
-		}
-		if (file == null) {
-			//获取补丁包
-			fileName = req.getParameter("patchname");
-			if (fileName != null) {
-				file = new File(repos.getDeployDir(), fileName);
-			}
-		}
-		if (file == null) {
-			//获取构建日志文件
-			fileName = req.getParameter("logfile");
-			if (fileName != null) {
-				file = new File(repos.getLogRoot(), fileName + ".log");
-			}
-		}
-		if (file == null) {
-			//获取加密补丁包
-			fileName = req.getParameter("enpatchname");
-			if (fileName != null) {
-				if (UserUtil.isDeployer(req))
-					file = PatchService.encodePatch(branch, fileName);
-			}
-		}
-		if (file == null) {
-			//获取已发布构建包
-			fileName = req.getParameter("fileofpatch");
-			if (fileName != null) {
-				String[] ps = fileName.split("/");
-				try {
-					File root = PatchService.getRootOfBPByPatch(branch, ps[0]);
-					file = new File(root, ps[1]);
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-				
-			}
+			break;
+		case epatch:
+			file = PatchFileService.encodePatch(branch, fileName);
+			break;
+		case log:
+			file = new File(repos.getLogRoot(), fileName + ".log");
+			break;
+		case patch:
+			file = new File(repos.getDeployDir(), fileName);
+			break;
+		case pbuild:
+			file = BuildFileService.getPrivateFile(branch, fileName);
+			break;
 		}
 		downloadFile(req, resp, file);
 	}

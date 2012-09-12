@@ -24,15 +24,15 @@ pageContext.setAttribute("changedFiles", changedFiles);
             <table id="tb_package">
                 <tr>
                     <td style="width:500px;" class="tv tips_bottom" >
-                    	<input type="text" id="file_name" style="width:100%"/>
-                    	<span class="tip">将包含在构建包中的文件列表，注意不要将SQL文件加入该列表。SQL文件会根据VP单列表自动加到最终构建包当中</span>
+                    	<div help_id="file_help"><input type="text" id="file_name" style="width:450px"/></div>
+	            		<div id="file_help">将包含在构建包中的文件列表。文件路径不带SVN目录，即从项目名称开始。注意不要将SQL文件加入该列表。SQL文件会根据VP单列表自动加到最终构建包当中</div>
                     </td>
                     <td class="tv">
                     	<button type="button" id="btn_add_file" onclick="add()">增加文件</button>
                     	<button type="button" id="btn_del_file" disabled="disabled" onclick="remove()">移除文件</button>
+                    	<button type="button" onclick="removeAll()">移除所有</button>
                     	<button type="button" onclick="window.location='<%=request.getContextPath()%>/manage/addbuild.jsp';">上一步</button>
                     	<button type="button" onclick="doNext()">提交构建</button>
-                    	
                     </td>
                 </tr>
             </table>
@@ -97,5 +97,9 @@ pageContext.setAttribute("changedFiles", changedFiles);
 		}
 		document.getElementById("build_files").value = value;
 		document.getElementById("confForm").submit();
+	}
+	
+	function removeAll() {
+		$("#file_list").empty();
 	}
 </script>

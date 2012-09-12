@@ -12,7 +12,8 @@ com.byttersoft.patchbuild.cache.*" %>
 
 <table id="tb_package">
    	<tr class="head">
-       	<td align="left" style="width:100%">等待构建列表
+       	<td align="left" style="width:100%"><div help_id="log_help">等待构建列表</div>
+       	<div id="log_help">点击条目下载详细日志</div>
    	<div style="width:100%; height:300px; overflow:auto;border:#69C solid 1px;">
    	<ul class="list">
    	<%
@@ -20,7 +21,7 @@ com.byttersoft.patchbuild.cache.*" %>
    			String log = waitLogs[i];
    			int index = log.indexOf(']');
    			if (index != -1) {
-   				log = "<a href='" + request.getContextPath() + "/manage/getFile.do?logfile=" +
+   				log = "<a href='" + request.getContextPath() + "/manage/getFile.do?type=log&filename=" +
    				log.substring(1, index) + "'>" + log + "</a>";
    			}
    			out.println("<li>" + log + "</li>");
@@ -31,7 +32,8 @@ com.byttersoft.patchbuild.cache.*" %>
    	</td>
    </tr>
    <tr class="head">
-       <td>构建历史信息
+       <td><div help_id="log_help2">构建历史信息</div>
+       <div id="log_help2">点击条目下载详细日志</div>
        <div style="width:100%; height:300px; overflow:auto; border:#69C solid 1px;">
        <ul class="list">
        <%
@@ -39,7 +41,7 @@ com.byttersoft.patchbuild.cache.*" %>
        		String log = buildLogs[i];
    			int index = log.indexOf(']');
    			if (index != -1) {
-   				log = "<a href='" + request.getContextPath() + "/manage/getFile.do?logfile=" +
+   				log = "<a href='" + request.getContextPath() + "/manage/getFile.do?type=log&filename=" +
    				log.substring(1, index) + "'>" + log + "</a>";
    			}
    			out.println("<li>" + log + "</li>");

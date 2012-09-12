@@ -4,9 +4,9 @@ com.byttersoft.patchbuild.utils.*" %>
 
 <%@ include file="/header.jsp"%>
 <%
-	String fileName = request.getParameter("fileName");
+	String fileName = request.getParameter("filename");
 	String branch = UserUtil.getBranch(request);
-	BuildFile info = BuildPackService.getBuildPackInfo(branch, fileName);
+	BuildFile info = BuildFileService.getBuildPackInfo(branch, fileName);
 	pageContext.setAttribute("info", info);
 	pageContext.setAttribute("conf", info.getConfig());
 %>

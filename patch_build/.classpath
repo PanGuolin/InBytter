@@ -26,5 +26,11 @@
 	<classpathentry kind="lib" path="webapp/WEB-INF/lib/standard.jar"/>
 	<classpathentry kind="lib" path="webapp/WEB-INF/lib/servlet-api-1.0.0.jar"/>
 	<classpathentry kind="lib" path="webapp/WEB-INF/lib/log4j-1.2.9.jar"/>
+	<classpathentry kind="lib" path="webapp/WEB-INF/lib/dsn.jar"/>
+	<classpathentry kind="lib" path="webapp/WEB-INF/lib/imap.jar"/>
+	<classpathentry kind="lib" path="webapp/WEB-INF/lib/mail.jar"/>
+	<classpathentry kind="lib" path="webapp/WEB-INF/lib/mailapi.jar"/>
+	<classpathentry kind="lib" path="webapp/WEB-INF/lib/pop3.jar"/>
+	<classpathentry kind="lib" path="webapp/WEB-INF/lib/smtp.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

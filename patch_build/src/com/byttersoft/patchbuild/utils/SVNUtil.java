@@ -174,7 +174,7 @@ public class SVNUtil {
 		List<String> list = new ArrayList<String>();
 		for (String s : modules) {
 			if (!"sql".equalsIgnoreCase(s)) {
-				list.add(s);
+				list.add(repos.getSvnRoot() + s + "/");
 			}
 		}
 		modules = (String[])list.toArray(new String[list.size()]);

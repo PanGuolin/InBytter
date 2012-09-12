@@ -15,7 +15,7 @@
         <version_pattern>yyMMdd</version_pattern>
         <version_suffix>beta</version_suffix>
         <test-users>autobuild;wudd;pangl;guanyq;huy;lixu;lianzhp;huh;liuchp;luoshj;
-            yanhm;zhangchun;zhangff;zhengwk;chengar;dingsl;lishc;lixiao;xieshzh
+            yanhm;zhangchun;zhangff;zhengwk;chengar;dingsl;lishc;lixiao;xieshzh;huwq
             </test-users>
         <deploy-users>autobuild;pangl</deploy-users>
     </repository>
@@ -32,7 +32,7 @@
         <version_pattern>yyMMdd</version_pattern>
         <version_suffix>beta</version_suffix>
         <test-users>autobuild;wudd;pangl;guanyq;huy;lixu;lianzhp;huh;liuchp;luoshj;
-            yanhm;zhangchun;zhangff;zhengwk;chengar;dingsl;lishc;lixiao;xieshzh</test-users>
+            yanhm;zhangchun;zhangff;zhengwk;chengar;dingsl;lishc;lixiao;xieshzh;huwq</test-users>
         <deploy-users>autobuild;pangl;huh;yanhm;lixu=lixu</deploy-users>
     </repository>
 </repositories>

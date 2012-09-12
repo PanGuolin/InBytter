@@ -17,7 +17,7 @@ import com.byttersoft.patchbuild.utils.PatchUtil;
  * @author pangl
  *
  */
-public class PatchService {
+public class PatchFileService {
 
 	/**
 	 * 产生加密补丁包
@@ -61,7 +61,7 @@ public class PatchService {
 			for (File f : patchs) {
 				if (f.isDirectory() || f.getName().equals("latest.zip"))
 					continue;
-				pInfos.add(PatchFile.getPatchFile(file, branch));
+				pInfos.add(PatchFile.getPatchFile(f, branch));
 			}
 		}
 		return (PatchFile[])pInfos.toArray(new PatchFile[pInfos.size()]);
@@ -105,7 +105,7 @@ public class PatchService {
 		for (File zip : zips) {
 			if (zip.getName().endsWith(".zip")) {
 				try {
-					BuildFile info = BuildPackService.getBuildPackInfo(branch, zip);
+					BuildFile info = BuildFileService.getBuildPackInfo(branch, zip);
 					bpInfos.add(info);
 				} catch (Exception e) {
 					e.printStackTrace();

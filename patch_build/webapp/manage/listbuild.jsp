@@ -3,7 +3,7 @@
 com.byttersoft.patchbuild.utils.*" %>
 <%@ include file="/header.jsp"%>
 <%
-	pageContext.setAttribute("infos", BuildPackService.listBildPackInfo(UserUtil.getBranch(request)));
+	pageContext.setAttribute("infos", BuildFileService.listBildPackInfo(UserUtil.getBranch(request)));
 %>
 	<div id="scrollTable">
 	<table class="thead">
@@ -48,10 +48,12 @@ com.byttersoft.patchbuild.utils.*" %>
 	
 <div id="menuDiv">
 <ul>
-	<li><a href="${contextPath}/manage/getFile.do?fileName=%FILENAME%">下载</a>
+	<li><a href="${contextPath}/manage/getFile.do?type=build&filename=%FILENAME%">下载</a>
 		<span class="tips">下载构建包内容以便测试</span></li>
-	<li><a href="${contextPath}/manage/viewbuild.jsp?fileName=%FILENAME%">查看详细信息</a>
+	<li><a href="${contextPath}/manage/viewbuild.jsp?filename=%FILENAME%">查看详细信息</a>
 		<span class="tips">查看构建包的详细信息，包括构建说明及历史等</span></li>
+	<li><a href="${contextPath}/manage/getFile.do?type=pbuild&filename=%FILENAME%">下载私家包</a>
+		<span class="tips">下载该构建包的私家包，自动包含依赖的构建包</span></li>
 	<li onclick="submitForm('cancel', '%CONFID%')">取消构建包
 		<span class="tips">将构建包删除，以使开发人员可以重新提交构建</span></li>
 	<li onclick="submitForm('test', '%CONFID%')">开始测试
@@ -62,6 +64,7 @@ com.byttersoft.patchbuild.utils.*" %>
 		<span class="tips">测试人员声明构建包已经被测试，并且没有问题，提醒发布人员该构建包可以发布（除非有依赖）</span></li>
 	<li onclick="submitForm('deploy', '%CONFID%')">发布
 		<span class="tips">发布人员发布构建包到当天的补丁中</span></li>
+		
 </ul>
 </div>
 <form action="${contextPath}/manage/buildManage.do" id="manageForm" method="POST">

@@ -491,13 +491,4 @@ public class BuildConfig {
 		return list; 
 	}
 	
-	void rollbackChange(long ts) {
-		//TODO: 同步
-		for (int i=0; i<changeLogs.size(); i++) {
-			if (changeLogs.get(i).getTs() == ts) {
-				changeLogs.remove(i);
-				break;
-			}
-		}
-	}
 }

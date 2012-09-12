@@ -69,11 +69,14 @@ com.byttersoft.patchbuild.utils.*" %>
     		}
     		var project = document.getElementById("selectedProjects");
     		var options = project.options;
-    		if (options.length == 0) {
-    			if (!confirm("没有选中工程将需要更多时间搜索，是否继续？")) {
-    				return;
-    			}
-    		}
+    		//if ($("[name='onlysql']").attr("checked")) {
+    		//} else {
+	    		if (options.length == 0) {
+	    			if (!confirm("没有选中工程将需要更多时间搜索，是否继续？")) {
+	    				return;
+	    			}
+	    		}
+    		//}
     		
     		var value = "";
     		
