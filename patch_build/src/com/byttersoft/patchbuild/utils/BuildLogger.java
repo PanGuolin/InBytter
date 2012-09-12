@@ -1,4 +1,4 @@
-package com.byttersoft.patchbuild;
+package com.byttersoft.patchbuild.utils;
 
 /**
  * 构建日志信息
@@ -18,14 +18,14 @@ import org.tmatesoft.svn.core.wc.SVNEvent;
 
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
 
-public class PackBuildLogger implements BuildListener, ISVNEventHandler {
+public class BuildLogger implements BuildListener, ISVNEventHandler {
 	
 	private File logFile;
 	private PrintStream writer;
 	private String id;
 	private PrintStream sysOut;
 	private PrintStream errOut;
-	public PackBuildLogger(RepositoryInfo repos, String id) {
+	public BuildLogger(RepositoryInfo repos, String id) {
 		this.id = id;
 		logFile = new File(repos.getLogRoot(), id + ".log");
 		logFile.getParentFile().mkdirs();

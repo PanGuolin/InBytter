@@ -138,31 +138,39 @@ public class BuildFile implements Comparable<BuildFile>, Cacheable{
 			public void run() {
 				synchronized (BuildFile.class) {
 					isStoring = true;
-					String name = file.getName();
-					name = name.substring(0, name.lastIndexOf('.'));
-					File root = BuildReposManager.getByName(branchName).getWorkspace();
-					root = new File(root, "temp_" + System.currentTimeMillis() + "/" + name);
-					root.mkdirs();
-					File xmlFile = new File(root, name + ".xml");
-					AntTaskUtil.unzip(file, root, null);
-					try {
-						BufferedWriter writer = new BufferedWriter(new FileWriter(xmlFile));
-						writer.write(config.toXML());
-						writer.flush();
-						writer.close();
-						AntTaskUtil.zip(root, file, null);
-						AntTaskUtil.deleteDir(root, null);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-					lastLoadTime = file.lastModified();
-					updateUseTime();
-					root.delete();
+					storeAndWait();
 					isStoring = false;
 				}
 			}
 		};
 		t.start();
+	}
+	
+	/**
+	 * 将配置信息写到ZIP包中并等待返回
+	 */
+	public void storeAndWait() {
+		if (isStoring || !file.exists()) return;
+		String name = file.getName();
+		name = name.substring(0, name.lastIndexOf('.'));
+		File root = BuildReposManager.getByName(branchName).getWorkspace();
+		root = new File(root, "temp_" + System.currentTimeMillis() + "/" + name);
+		root.mkdirs();
+		File xmlFile = new File(root, name + ".xml");
+		AntTaskUtil.unzip(file, root, null);
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(xmlFile));
+			writer.write(config.toXML());
+			writer.flush();
+			writer.close();
+			AntTaskUtil.zip(root, file, null);
+			AntTaskUtil.deleteDir(root, null);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		lastLoadTime = file.lastModified();
+		updateUseTime();
+		root.delete();
 	}
 	
 	/**

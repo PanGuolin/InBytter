@@ -15,7 +15,6 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.util.FileUtils;
 
-import com.byttersoft.patchbuild.PackBuildLogger;
 import com.byttersoft.patchbuild.beans.BuildConfig;
 import com.byttersoft.patchbuild.beans.BuildFile;
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
@@ -45,7 +44,7 @@ public class PatchUtil {
 	public static void buildPackage(BuildConfig config) throws Exception{
 		
 		RepositoryInfo repos = BuildReposManager.getByName(config.getVersion());
-		PackBuildLogger logger = new PackBuildLogger(repos, config.getId());
+		BuildLogger logger = new BuildLogger(repos, config.getId());
 		logger.startBuild();
 		try {
 			String id = config.getId();
@@ -203,7 +202,7 @@ public class PatchUtil {
 	 * @param config
 	 * @throws IOException
 	 */
-	private static void copy4BuildPack(BuildConfig config, PackBuildLogger logger) throws IOException {
+	private static void copy4BuildPack(BuildConfig config, BuildLogger logger) throws IOException {
 		
 		File packDir = getPackDir(config);
 		doCopy(config, config.getWebFileList(), "/src/main/webapp/", new File(packDir, "web"), logger);
@@ -234,7 +233,7 @@ public class PatchUtil {
 	 * @param destDir
 	 * @throws IOException
 	 */
-	private static void doCopy(BuildConfig config, String[] files, String subDir, File destDir, PackBuildLogger logger) throws IOException {
+	private static void doCopy(BuildConfig config, String[] files, String subDir, File destDir, BuildLogger logger) throws IOException {
 		if (files == null || files.length == 0)
 			return;
 		if (!destDir.exists())
@@ -292,7 +291,7 @@ public class PatchUtil {
 	 * @param config
 	 * @throws IOException
 	 */
-	private static void compileJava(BuildConfig config, PackBuildLogger logger) throws IOException {
+	private static void compileJava(BuildConfig config, BuildLogger logger) throws IOException {
 		
 		if (config.getJavaFileList().length == 0)
 			return;

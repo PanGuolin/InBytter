@@ -15,7 +15,7 @@ public class MailUtilTest extends TestCase{
 	public void test_sendMail() throws Exception {
 		MailInfo info = new MailInfo();
 		info.setContent("<html><body><h1>test</h1></body></html>");
-		info.setToAddrs("panda561@163.com");
+		info.setToAddrs("pangl@bytter.com");
 		info.setSubject("测试邮件3");
 		MailUtil.sendMail(info);
 		assertTrue(true);

@@ -22,12 +22,21 @@ public abstract class AntTaskUtil {
 	 * @param config
 	 */
 	public static void deleteDir(File dir, BuildListener logger) {
+		if (!dir.exists())
+			return;
 		Delete delete = new Delete();
 		delete.setProject(new Project());
 		delete.setDir(dir);
 		if (logger != null)
 			delete.getProject().addBuildListener(logger);
 		delete.execute();
+	}
+	
+	public static void emptyDir(BuildListener logger, File... dirs) {
+		for (File dir : dirs) {
+			deleteDir(dir, logger);
+			dir.mkdirs();
+		}
 	}
 	
 	

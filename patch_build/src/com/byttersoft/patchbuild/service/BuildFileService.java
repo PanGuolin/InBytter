@@ -1,12 +1,10 @@
 package com.byttersoft.patchbuild.service;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -16,12 +14,12 @@ import java.util.TreeSet;
 
 import org.apache.tools.ant.util.FileUtils;
 
-import com.byttersoft.patchbuild.PackBuildLogger;
 import com.byttersoft.patchbuild.beans.BuildConfig;
 import com.byttersoft.patchbuild.beans.BuildFile;
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
 import com.byttersoft.patchbuild.cache.BPICache;
 import com.byttersoft.patchbuild.utils.AntTaskUtil;
+import com.byttersoft.patchbuild.utils.BuildLogger;
 import com.byttersoft.patchbuild.utils.PatchUtil;
 
 /**
@@ -30,6 +28,11 @@ import com.byttersoft.patchbuild.utils.PatchUtil;
  *
  */
 public class BuildFileService {
+	
+	/**
+	 * 最后的补丁包名称
+	 */
+	public static final String LATEST_PATCH_NAME = "latest.zip";
 	
 	/**
 	 * 获取指定分支上的一个BuildPackInfo对象
@@ -64,14 +67,13 @@ public class BuildFileService {
 	 * @param config 构建包信息
 	 * @return
 	 */
-	public static void checkCanDeploy(BuildFile info) throws Exception{
-		BuildConfig config = info.getConfig();
-		RepositoryInfo reposInfo = BuildReposManager.getByName(config.getVersion());
-		File root = reposInfo.getBuildDir();
-		String[] deps = config.getDepends();
-		for (String dep : deps) {
-			if (new File(root, dep + ".zip").exists()) {
-				throw new Exception("依赖的包未发布：" + dep);
+	public static void checkCanDeploy(BuildFile buildFile) throws Exception{
+		List<BuildFile> allBuildFiles = new ArrayList<BuildFile>();
+		retriveDepends(buildFile, null, allBuildFiles);
+		for (int i=allBuildFiles.size()-2; i>=0; i--) {
+			BuildFile bf = allBuildFiles.get(i);
+			if (bf.getFile().exists() && bf.getConfig().getDeployTS() <= 0) {
+				throw new Exception("依赖的包未发布：" + bf.getFileName());
 			}
 		}
 	}
@@ -82,105 +84,48 @@ public class BuildFileService {
 	 * @param id
 	 * @throws Exception
 	 */
-	public static void deployPack(BuildFile info) throws Exception {
-		BuildConfig config = info.getConfig();
+	public static void deployPack(BuildFile buildFile) throws Exception {
+		BuildConfig config = buildFile.getConfig();
 		String id = config.getId();
-		RepositoryInfo reposInfo = BuildReposManager.getByName(info.getBranchName());
-		PackBuildLogger logger = new PackBuildLogger(reposInfo, id + "_deploy");
+		RepositoryInfo reposInfo = BuildReposManager.getByName(buildFile.getBranchName());
+		BuildLogger logger = new BuildLogger(reposInfo, id + "_deploy");
 		logger.startBuild();
 		try {
-			File buidPackFile = new File(reposInfo.getBuildDir(), id+ ".zip");
-			checkCanDeploy(info);
-			File tempBackDir = new File(reposInfo.getWorkspace(), "temp/" + id);
-			AntTaskUtil.unzip(buidPackFile, tempBackDir, logger);
-			
-			//修改配置文件
-			File configXML = new File(tempBackDir, id + ".xml");
-			config.setDeployTS(System.currentTimeMillis());
-			PatchUtil.write2File(config.toXML(), configXML);
-			
-			//重新压缩到备份包
+			checkCanDeploy(buildFile);
+			//合并构建包及其依赖的包到补丁当中
 			Date curDate = Calendar.getInstance().getTime();
-			String path = PatchUtil.getBackupDir(curDate);
-			File backFile = new File(reposInfo.getDeployBackupDir(), path + id + ".zip");
-			AntTaskUtil.zip(tempBackDir, backFile, logger);
-			
-			//合并发布包
-			synchronized (BuildFileService.class) {
-				String patchName = reposInfo.getVersionNo() +
-						(reposInfo.getVersionPattern() == null ? "" : new SimpleDateFormat(reposInfo.getVersionPattern()).format(curDate)) +
+			String patchName = reposInfo.getVersionNo() +
+					(reposInfo.getVersionPattern() == null ? "" : 
+						new SimpleDateFormat(reposInfo.getVersionPattern()).format(curDate)) +
 						reposInfo.getVersionSuffix();
-				if (patchName.endsWith(".zip"))
-					patchName = patchName.substring(0, patchName.length() - ".zip".length());
-				File patchTemp = new File(reposInfo.getWorkspace(), "temp/" + patchName);
-				AntTaskUtil.deleteDir(patchTemp, logger);
-				patchTemp.mkdirs();
-				
-				logger.logMessage("拷贝前一次补丁内容===========================");
-				File latestFile = new File(reposInfo.getDeployDir(), "latest.zip");
-				AntTaskUtil.unzip(latestFile, patchTemp, logger);
-				
-				logger.logMessage("拷贝构建包内容===========================");
-				AntTaskUtil.copyFiles(tempBackDir, patchTemp, "web/**/*.*", logger);
-				AntTaskUtil.copyFiles(tempBackDir, patchTemp, "cs/**/*.*", logger);
-				//copyDir(new File(tempBackDir, "web"), new File(patchTemp, "web"));
-				//copyDir(new File(tempBackDir, "cs"), new File(patchTemp, "cs"));
-				
-				//合并SQL内容
-				for (String sqlSufix : reposInfo.getSqlSuffixs()) {
-					final String suffix = sqlSufix;
-					final StringBuilder sb = new StringBuilder();
-					File[] vpSqls = new File(tempBackDir, "/sql").listFiles(new FilenameFilter() {
-						public boolean accept(File dir, String name) {
-							if (name.endsWith(suffix)) {
-								sb.append(name + ";"); 
-								return true;
-							}
-							return false;
-						}
-					});
-					if (vpSqls == null || vpSqls.length == 0)
-						continue;
-					File patchSql = new File(patchTemp, "sql/" + patchName + sqlSufix);
-					logger.logMessage("合并SQL文件：" + sb.toString());
-					PatchUtil.mergeSqlTo(vpSqls, patchSql, reposInfo.getSqlEncoding());
-				}
-				//合并readme内容
-				File readmeFile = new File(patchTemp, "readme.txt");
-				logger.logMessage("合并ReadMe文件：" + readmeFile + "===========================");
-				StringBuilder sb = new StringBuilder();
-				if (readmeFile.exists()) {
-					sb = PatchUtil.readFile(readmeFile, "GBK");
-				}
-				PatchUtil.replaceSection(sb, id, config.getVps() + "\r\n" + config.getComment());
-				PatchUtil.write2File(sb.toString(), readmeFile);
-	
-				logger.logMessage("写入版本信息 " + reposInfo.getVersionInfo() + "===========================");
-				StringBuilder versionInfo = PatchUtil.readFile(reposInfo.getVersionInfo(), "UTF-8");
-				int start = versionInfo.indexOf("<bs_ver>");
-				int end = versionInfo.indexOf("</bs_ver>");
-				versionInfo.replace(start+"<bs_ver>".length(), end, patchName);
-				PatchUtil.write2File(versionInfo.toString(), new File(patchTemp, "web/WEB-INF/versioninfo.xml"));
-				
-				//重新压缩到补丁
-				File patchFile = new File(reposInfo.getDeployDir(), patchName + ".zip");
-				logger.logMessage("重新压缩补丁 ===========================");
-				AntTaskUtil.zip(patchTemp, patchFile, logger);
-				FileUtils.getFileUtils().copyFile(patchFile, latestFile);
-				
-				
-				//拷贝class文件
-				
-				logger.logMessage("拷贝依赖文件 ===========================");
-				AntTaskUtil.copyFiles(new File(tempBackDir + "/web/WEB-INF/classes"),
-						reposInfo.getCompileClassDir(), "**/*.class", logger);
-				
-				logger.logMessage("清除临时文件===========================");
-				AntTaskUtil.deleteDir(tempBackDir, logger);
-				AntTaskUtil.deleteDir(patchTemp, logger);
-				buidPackFile.delete();
-				removeDepend(info);
-				BPICache.remove(info);
+			File patchFile = new File(reposInfo.getDeployDir(), patchName + ".zip");
+			buildPatchFile(buildFile, patchFile, logger);
+			File latestFile = new File(reposInfo.getDeployDir(), LATEST_PATCH_NAME);
+			FileUtils.getFileUtils().copyFile(patchFile, latestFile);
+			
+			//拷贝最新的class依赖
+			File temp = new File(reposInfo.getWorkspace(), "temp/latest");
+			AntTaskUtil.emptyDir(logger, temp);
+			AntTaskUtil.unzip(latestFile, temp, logger);
+			AntTaskUtil.copyFiles(new File(temp, "/web/WEB-INF/classes"), 
+					reposInfo.getCompileClassDir(), "**/*.class", logger);
+			
+			//备份并移除已发布的包
+			List<BuildFile> allBuildFiles = new ArrayList<BuildFile>();
+			retriveDepends(buildFile, null, allBuildFiles);
+			String path = PatchUtil.getBackupDir(curDate);
+			//修改发布时间
+			for (int i=allBuildFiles.size()-1; i>=0; i--) {
+				BuildFile bf = allBuildFiles.get(i);
+				BuildConfig cfg = bf.getConfig();
+				cfg.setDeployTS(System.currentTimeMillis());
+				bf.storeAndWait();
+				//备份文件并移除相关信息
+				File backFile = new File(reposInfo.getDeployBackupDir(), path + cfg.getId() + ".zip");
+				FileUtils.getFileUtils().copyFile(bf.getFile(), backFile);
+				bf.getFile().delete();
+				removeDepend(bf);
+				BPICache.remove(bf);
 			}
 		} catch (Exception ex) {
 			logger.logMessage(ex.getMessage());
@@ -297,57 +242,141 @@ public class BuildFileService {
 	 * @return
 	 * @throws IOException 
 	 */
-	public static File getPrivateFile(String branchName, String file)  {
+	public static File getPrivateFile(String branchName, String file) throws IOException  {
 		RepositoryInfo repos = BuildReposManager.getByName(branchName);
+		File latestPatch = new File(repos.getDeployDir(), LATEST_PATCH_NAME);
 		BuildFile buildFile = getBuildPackInfo(branchName, file);
-		
-		BuildConfig config = buildFile.getConfig();
-		String[] depends = config.getDepends();
-		if (depends != null) {
-			List<String> dependList = new ArrayList<String>();
-			dependList.addAll(Arrays.asList(depends));
-			retriveDepends(buildFile, dependList);
-			depends = (String[])dependList.toArray(new String[dependList.size()]);
-		}
-		
-		File ws = repos.getWorkspace();
-		File root = new File(ws, "privateBuild" + buildFile.getConfig().getId() + System.currentTimeMillis());
-		root.mkdirs();
-		
-		StringBuilder sb = new StringBuilder();
-		if (depends != null) {
-			for (int i=depends.length - 1; i >=0; i--) {
-				BuildFile depFile = BuildFileService.getBuildPackInfo(buildFile.getBranchName(), depends[i]);
-				if (depFile != null) {
-					AntTaskUtil.unzip(depFile.getFile(), root, null);
-					sb.append(depends[i] + "\r\n");
-				}
-			}
-		}
-		try {
-			FileWriter writer = new FileWriter(new File(root, config.getId() + "_depends.txt"));
-			writer.write(sb.toString());
-			writer.flush();
-			writer.close();
-		} catch (Exception ex) {
-			//此处不做处理，如果写入错误则简单忽略，不影响流程
-			ex.printStackTrace();
-		}
-		AntTaskUtil.unzip(buildFile.getFile(), root, null);
-		
 		File targetFile = new File(repos.getPrivateDir(), "private_" + buildFile.getFileName());
-		AntTaskUtil.zip(root, targetFile, null);
+		//如果私家已存在并且是最新的则直接返回
+		if (targetFile.exists() && 
+				targetFile.lastModified() > buildFile.getFile().lastModified() &&
+				targetFile.lastModified() > latestPatch.lastModified()) {
+			return targetFile;
+		}
 		
-		AntTaskUtil.deleteDir(root, null);
+		buildPatchFile(buildFile, targetFile, null);
 		return targetFile;
 	}
 	
 	/**
-	 * 获取所有依赖的构建包对象，被依赖的构建包放在列表后面
-	 * @param depends
-	 * @param buildFile
+	 * 合并SQL文件
+	 * @param repos
+	 * @param patchDir
+	 * @param buildDir
+	 * @param patchName
+	 * @param logger
+	 * @throws IOException
 	 */
-	private static void retriveDepends(BuildFile buildFile, List<String> dependList) {
+	private static void mergeSqls(RepositoryInfo repos, File patchDir, File buildDir, String patchName, BuildLogger logger) throws IOException {
+		logger.logMessage("合并SQL ===============================");
+		for (String sqlSufix : repos.getSqlSuffixs()) {
+			final String suffix = sqlSufix;
+			final StringBuilder sb = new StringBuilder();
+			File[] vpSqls = new File(buildDir, "/sql").listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					if (name.endsWith(suffix)) {
+						sb.append(name + ";"); 
+						return true;
+					}
+					return false;
+				}
+			});
+			if (vpSqls == null || vpSqls.length == 0)
+				continue;
+			File patchSql = new File(patchDir, "sql/" + patchName + sqlSufix);
+			logger.logMessage("合并SQL文件：" + sb.toString());
+			PatchUtil.mergeSqlTo(vpSqls, patchSql, repos.getSqlEncoding());
+		}
+	}
+	
+	private static void mergeReadme(File patchTemp, List<BuildFile> buildFiles, BuildLogger logger) throws IOException {
+		File readmeFile = new File(patchTemp, "readme.txt");
+		logger.logMessage("合并ReadMe文件：" + readmeFile + "===========================");
+		StringBuilder sb = new StringBuilder();
+		if (readmeFile.exists()) {
+			sb = PatchUtil.readFile(readmeFile, "GBK");
+		}
+		for (BuildFile bf : buildFiles) {
+			BuildConfig config = bf.getConfig();
+			PatchUtil.replaceSection(sb, config.getId(), config.getVps() + "\r\n" + config.getComment());
+			PatchUtil.write2File(sb.toString(), readmeFile);
+		}
+	}
+	
+	/**
+	 * 构建补丁包或私家包
+	 * @param branchName 分支名称
+	 * @param buildFileName 构建包名称
+	 * @param patchFile 目标文件
+	 * @param logger 日志输出对象
+	 * @throws IOException
+	 */
+	private static void buildPatchFile(BuildFile buildFile, File patchFile, BuildLogger logger) throws IOException {
+		String patchName = patchFile.getName();
+		if (patchName.endsWith(".zip"))
+			patchName = patchName.substring(0, patchName.length() - ".zip".length());
+		RepositoryInfo repos = BuildReposManager.getByName(buildFile.getBranchName());
+		boolean newLogger = logger == null;
+		if (newLogger) {
+			logger = new BuildLogger(repos, patchName + "build.log");
+			logger.startBuild();
+		}
+		
+		File patchTemp = new File(repos.getWorkspace(), "temp/" + patchName);
+		File buildTemp = new File(repos.getWorkspace(), "temp/" + patchName + "_build");
+		AntTaskUtil.emptyDir(logger, patchTemp, buildTemp);
+		
+		logger.logMessage("拷贝前一次补丁内容===========================");
+		File latestFile = new File(repos.getDeployDir(), LATEST_PATCH_NAME);
+		AntTaskUtil.unzip(latestFile, patchTemp, logger);
+		
+		logger.logMessage("解压构建包补丁内容 ===============================");
+		List<BuildFile> allBuildFiles = new ArrayList<BuildFile>();
+		retriveDepends(buildFile, null, allBuildFiles);
+		for (int i=allBuildFiles.size()-1; i>=0; i--) {
+			BuildFile bf = allBuildFiles.get(i);
+			AntTaskUtil.unzip(bf.getFile(), buildTemp, logger);
+		}
+		
+		logger.logMessage("拷贝构建包内容===========================");
+		AntTaskUtil.copyFiles(buildTemp, patchTemp, "web/**/*.*", logger);
+		AntTaskUtil.copyFiles(buildTemp, patchTemp, "cs/**/*.*", logger);
+		
+		mergeSqls(repos, patchTemp, buildTemp, patchName, logger);
+		mergeReadme(patchTemp, allBuildFiles, logger);
+
+		logger.logMessage("写入版本信息 " + repos.getVersionInfo() + "===========================");
+		StringBuilder versionInfo = PatchUtil.readFile(repos.getVersionInfo(), "UTF-8");
+		int start = versionInfo.indexOf("<bs_ver>");
+		int end = versionInfo.indexOf("</bs_ver>");
+		versionInfo.replace(start+"<bs_ver>".length(), end, patchName);
+		PatchUtil.write2File(versionInfo.toString(), new File(patchTemp, "web/WEB-INF/versioninfo.xml"));
+		
+		//重新压缩到补丁
+		logger.logMessage("重新压缩补丁 ===========================");
+		AntTaskUtil.zip(patchTemp, patchFile, logger);
+
+		logger.logMessage("清除临时文件===========================");
+		AntTaskUtil.deleteDir(buildTemp, logger);
+		AntTaskUtil.deleteDir(patchTemp, logger);
+		if (newLogger)
+			logger.endBuild();
+	}
+	
+	/**
+	 * 获取所有依赖的构建包对象，被依赖的构建包放在列表后面
+	 * @param buildFile 
+	 * @param dependList 被依赖的构建包ID列表，初始时为null
+	 * @param allBuildFiles 所有构建包列表，不能为null，初始时传一个长度为0的List<BuildFile>对象
+	 */
+	private static void retriveDepends(BuildFile buildFile, List<String> dependList, List<BuildFile> allBuildFiles) {
+		if (dependList == null)
+			dependList = new ArrayList<String>();
+		if (dependList.size() == 0)
+			dependList.add(buildFile.getConfig().getId());
+		if (allBuildFiles.size() == 0)
+			allBuildFiles.add(buildFile);
+		
 		String[] depends = buildFile.getConfig().getDepends();
 		if (depends != null) {
 			for (String depend : depends) {
@@ -357,10 +386,13 @@ public class BuildFileService {
 				String id = depFile.getConfig().getId();
 				//被依赖的包移到最后
 				if (dependList.contains(id)) {
-					dependList.remove(id);
+					int index = dependList.indexOf(id);
+					dependList.remove(index);
+					allBuildFiles.remove(index);
 				}
 				dependList.add(id);
-				retriveDepends(depFile, dependList);
+				allBuildFiles.add(depFile);
+				retriveDepends(depFile, dependList, allBuildFiles);
 			}
 		}
 	}

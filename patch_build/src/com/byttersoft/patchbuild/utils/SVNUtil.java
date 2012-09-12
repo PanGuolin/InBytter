@@ -31,7 +31,6 @@ import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 import org.tmatesoft.svn.util.SVNLogType;
 
-import com.byttersoft.patchbuild.PackBuildLogger;
 import com.byttersoft.patchbuild.beans.ChangedSVNFiles;
 import com.byttersoft.patchbuild.beans.RepositoryInfo;
 import com.byttersoft.patchbuild.service.BuildReposManager;
@@ -235,7 +234,7 @@ public class SVNUtil {
 	 * @throws SVNException
 	 */
 	@SuppressWarnings("deprecation")
-	public static void checkOutModule(String branch, String module, PackBuildLogger logger) throws SVNException {
+	public static void checkOutModule(String branch, String module, BuildLogger logger) throws SVNException {
 		if (offLineMode)
 			return;
 		if (logger != null) {

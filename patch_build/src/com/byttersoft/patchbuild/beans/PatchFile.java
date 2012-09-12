@@ -87,10 +87,11 @@ public class PatchFile implements Comparable<PatchFile>{
 	}
 
 	public int compareTo(PatchFile o) {
-		int value = (int) (o.file.lastModified() - file.lastModified());
-		if (value != 0)
-			return value;
-		return o.file.getName().compareTo(file.getName());
+		return (int) (o.file.length() - file.length());
+//		int value = (int) (o.file.lastModified() - file.lastModified());
+//		if (value != 0)
+//			return value;
+//		return o.file.getName().compareTo(file.getName());
 	}
 	
 	private static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
