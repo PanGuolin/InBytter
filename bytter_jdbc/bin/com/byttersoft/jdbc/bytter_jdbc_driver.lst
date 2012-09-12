@@ -1,0 +1,4 @@
+db2=com.ibm.db2.jcc.DB2Driver
+oracle=oracle.jdbc.driver.OracleDriver
+oracle10g=
+sqlserver=com.microsoft.sqlserver.jdbc.SQLServerDriver
